@@ -17,11 +17,21 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import pytest
+import sys
+import pathlib
+from ctypes.util import find_library
 
 from libzim.writer import Article, Blob, Creator
 
+BASE_DIR = pathlib.Path(__file__).parent
+sys.path.insert(0, str(BASE_DIR))
+
+if not find_library('zim'):
+    raise ImportError('Missing libzim.so or libzim.a dylib in system libs')
+
 # test files https://wiki.kiwix.org/wiki/Content_in_all_languages
 
+from libzim import ZimArticle, ZimBlob, ZimCreator
 
 # https://wiki.openzim.org/wiki/Metadata
 @pytest.fixture(scope="session")
