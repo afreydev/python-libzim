@@ -1,0 +1,20 @@
+[build-system]
+requires = [ "setuptools >= 35.0.2", "wheel >= 0.29.0", "twine", "cython == 0.29.6" ]
+build-backend = "setuptools.build_meta"
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+envlist = py36,py37
+
+[testenv]
+platform = linux|darwin
+deps =
+    pytest >= 3.0.0, <4
+    cython
+commands = pytest
+"""
+
+[tool.black]
+line-length = 110
+target-version = ['py36', 'py37', 'py38']
