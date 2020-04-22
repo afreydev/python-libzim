@@ -1,7 +1,11 @@
 
 # python-libzim
 
-Python bindings for [libzim](https://github.com/openzim/libzim).
+> The Python bindings for [`libzim`](https://github.com/openzim/libzim).
+
+This library allows you to interact with `.zim` files via Python.
+
+It just provides a shallow python interface on top of the  `libzim` C++ library (maintained by [OpenZIM](https://github.com/openzim)).
 
 ## Quickstart
 
@@ -10,40 +14,21 @@ Python bindings for [libzim](https://github.com/openzim/libzim).
 pip3 install libzim
 ```
 
-Then import the writer models and methods using `from libzim import ...`:
-
 ```python3
 # Writer API
-from libzim import zimcreator, ZimArticle
+from libzim import ZimCreator, ZimArticle, ZimBlob, ...
 
 with zimcreator('test.zim') as zc:
-    zc.add_article(ZimArticle(
-        content='''<!DOCTYPE html> 
-        <html>
-            <head>
-                <meta charset="UTF-8">
-                <title>Zim Test</title>
-            </head>
-            <body>
-                <h1> ñññ Unicode 🎉 ñññ </h1>
-            </body>
-        </html>
-        ''',
-            filename='index.html',
-            url='A/index.html',
-            title='Zim Test',
-            should_compress=True,
-            should_index=True,
-            mime_type="text/html",
-        ))
+    zc.add_article(ZimArticle(...))
+```
 
-# Reader API coming soon...
+```python3
+# Reader API (coming soon...)
 from libzim import zimreader
 
 with zimreader('test.zim') as zr:
     for article in zr.namespace('A'):
-        print(article.url, article.filename, article.mime_type, article.title)
-        print(article.content.decode())
+        print(article.url, article.title, article.content.decode())
 ```
 
 ---
@@ -70,8 +55,9 @@ LIBZIM_LIBRARY_PATH=lib/x86_64-linux-gnu/libzim.so.$LIBZIM_VERSION
 LIBZIM_INCLUDE_PATH=include/zim
 
 wget -qO- https://download.openzim.org/release/libzim/$LIBZIM_RELEASE.tar.gz | tar -xz -C .
-sudo mv $LIBZIM_RELEASE/$LIBZIM_LIBRARY_PATH /usr/lib/libzim.so
-sudo mv $LIBZIM_RELEASE/$LIBZIM_INCLUDE_PATH /usr/include/zim
+sudo mv $LIBZIM_RELEASE/$LIBZIM_LIBRARY_PATH lib/libzim.so
+sudo mv $LIBZIM_RELEASE/$LIBZIM_INCLUDE_PATH include/zim
+export LD_LIBRARY_PATH="$PWD/lib:$LD_LIBRARY_PATH"
 sudo ldconfig
 ```
 If a pre-built release is not available for your platform, you can also [install `libzim` from source](https://github.com/openzim/libzim#dependencies).
@@ -136,25 +122,7 @@ $ python -c "from libzim import ZimArticle"
 
 ## Common Tasks
 
-### Rebuild Cython extension
-
-```bash
-rm libzim/libzim.cpp
-rm -Rf build
-rm -Rf *.so
-python setup.py build_ext
-python setup.py install
-```
-
-### Build package `stist` and `bdist_wheels` for PyPI
-```bash
-python setup.py sdist bdist_wheel
-
-# upload to PyPI (caution: this is done automatically via Github Actions)
-twine upload dist/*
-```
-
-### Run Tests
+### Run Linters & Tests
 
 ```bash
 # Autoformat code with black
@@ -167,38 +135,41 @@ mypy .
 pytest .
 ```
 
-
+### Rebuild Cython extension during development
 
 ```bash
-python setup.py build_ext -i
-python tests/test_libzim.py
-
-# or
-
-./rebuild.sh
-./run_tests
+rm libzim/libzim.cpp
+rm -Rf build
+rm -Rf *.so
+python setup.py build_ext
+python setup.py install
 ```
+
+### Build package `stist` and `bdist_wheels` for PyPI
+
 ```bash
-docker build --tag openzim:python-libzim .
-docker run python-libzim -v .:/opt/python-libzim
-docker run \
-  --name=hera \
-  --network=hera \
-  -v /var/run/docker.sock:/var/run/docker.sock \
-  -v /path/to/certs:/certs \
-  aschzero/hera:latest
+python setup.py build_ext
+python setup.py sdist bdist_wheel
+
+# upload to PyPI (caution: this is done automatically via Github Actions)
+twine upload dist/*
 ```
+
+### Use a specific `libzim` dylib and headers when compiling `python-libzim`
+
 ```bash
-docker-compose build
-docker-compose run libzim /bin/bash
+export LIBZIM_INCLUDE_DIR=/tmp/libzim_linux-x86_64-6.1.1/include
+export LIBZIM_LIBRARY_DIR=/tmp/libzim_linux-x86_64-6.1.1/lib/x86_64-linux-gnu
+python setup.py build_ext
+python setup.py install
 ```
 
 ---
 
-## API Reference
+## Examples
 
 ```python3
-from libzim import ZimArticle, ZimBlob, ZimCreator
+from libzim import zimcreator, ZimArticle, ZimBlob, ZimCreator
 
 class ZimTestArticle(ZimArticle):
     content = '''<!DOCTYPE html> 
@@ -235,22 +206,37 @@ class ZimTestArticle(ZimArticle):
     def get_data(self):
         return ZimBlob(self.content.encode('UTF-8'))
 
-# Create a ZimTestArticle article
 
-article = ZimTestArticle()
+# Set up a ZimCreator instance to collect articles into one .zim file
+zim_creator = ZimCreator(
+    'test.zim',
+    main_page="welcome",
+    index_language="eng",
+    min_chunk_size=2048,
+)
+zim_creator.update_metadata(
+    name='Hola',
+    title='Test Zim',
+    publisher='Monadical',
+    creator='python-libzim',
+    description='Created in python', 
+)
 
-# Write the articles
+# Write the test article to .zim file by adding it via the ZimCreator
+zim_creator.add_article(ZimTestArticle())
 
-import uuid
-rnd_str = str(uuid.uuid1()) 
-test_zim_file_path = "/opt/python-libzim/tests/kiwix-test"
+# ZimCreator.finalize() must be called in order to save the writes to disk
+zim_creator.finalize()
 
-with ZimCreator(test_zim_file_path + '-' + rnd_str + '.zim') as zc:
+# Alternatively, use the context manager form of ZimCreator
+#   to avoid having to call .finalize() manually:
+with zimcreator('test.zim', main_index="welcome", ...) as zc:
     zc.add_article(article)
     if not zc.mandatory_metadata_ok():
         zc.update_metadata(creator='python-libzim',
                                     description='Created in python',
-                                    name='Hola',publisher='Monadical',
+                                    name='Hola',
+                                    publisher='Monadical',
                                     title='Test Zim')
-
+    # zc.finalize() is called automatically when context manager exits
 ```
