@@ -131,7 +131,6 @@ setup(
             )
         ],
         compiler_directives={"language_level" : "3"},
-        build_dir="cython_build",
     ),
     zip_safe=False,
     classifiers=[
