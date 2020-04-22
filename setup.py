@@ -47,14 +47,12 @@ GITHUB_URL = "https://github.com/openzim/python-libzim"
 BASE_DIR = Path(__file__).parent
 LIBZIM_CYTHON_DIR = 'libzim'
 
-LIBZIM_INCLUDE_DIR = os.getenv('LIBZIM_INCLUDE_DIR')
-LIBZIM_LIBRARY_DIR = os.getenv('LIBZIM_LIBRARY_DIR')
-
-INCLUDE_DIRS = [str(BASE_DIR / LIBZIM_CYTHON_DIR), '/usr/include']
-LIBRARY_DIRS = ['/usr/lib']
+INCLUDE_DIRS = [str(BASE_DIR / LIBZIM_CYTHON_DIR), str(BASE_DIR / 'include')]
+LIBRARY_DIRS = [str(BASE_DIR / 'lib')]
 
 # use this option if you wish to manually specify the path to a prebuilt libzim release (.so and .h files)
 # set it to the path of the unzipped libzim subfolder containing zim/*.h
+LIBZIM_INCLUDE_DIR = os.getenv('LIBZIM_INCLUDE_DIR')
 if LIBZIM_INCLUDE_DIR:
     if (Path(LIBZIM_INCLUDE_DIR) / 'zim/zim.h').exists():
         INCLUDE_DIRS.insert(0, str(LIBZIM_INCLUDE_DIR))
@@ -68,13 +66,14 @@ if LIBZIM_INCLUDE_DIR:
 
 # use this option to manually specify the libzim dynamic library (aka "shared object") dir
 # set it to the path of the unzipped libzim subfolder containing libzim.so
+LIBZIM_LIBRARY_DIR = os.getenv('LIBZIM_LIBRARY_DIR')
 if LIBZIM_LIBRARY_DIR:
     if not ((Path(LIBZIM_LIBRARY_DIR) / 'libzim.so').exists() or (Path(LIBZIM_LIBRARY_DIR) / 'libzim.a').exists()):
-        potential_dylibs = [f for f in LIBZIM_LIBRARY_DIR.iterdir() if 'libzim.so' in str(f)]
+        potential_dylibs = [f for f in Path(LIBZIM_LIBRARY_DIR).iterdir() if 'libzim.so' in str(f)]
         raise Exception(
             f'Could not find libzim.so file in LIBZIM_LIBRARY_DIR={LIBZIM_LIBRARY_DIR}\n' +
             (
-                f'    Hint: ln -s {potential_dylibs[0].name} {LIBZIM_LIBRARY_DIR / "libzim.so"}'
+                f'    Hint: ln -s {potential_dylibs[0].name} {LIBZIM_LIBRARY_DIR}/libzim.so'
                 if potential_dylibs else
                 f'    Hint: LIBZIM_LIBRARY_DIR should look something like .../libzim_linux-x86_64-{VERSION}/lib/x86_64-linux-gnu'
             )
@@ -83,8 +82,8 @@ if LIBZIM_LIBRARY_DIR:
 else:
     # the default is to dynamically link (finds externally installed libzim on user's system)
     if not (find_library('zim')):
-        raise Exception(
-            'Could not find libzim.so in available system libraries\n'
+        print(
+            '[!] Warning: Could not find libzim.so in available system libraries\n'
             '    Hint: Install it from source from https://github.com/openzim/libzim\n'
             '          or download a prebuilt zim release and set the env varaibles to point to it:\n'
             f'    LIBZIM_INCLUDE_DIR=/libzim_linux-x86_64-{VERSION}/include\n'
