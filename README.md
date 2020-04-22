@@ -3,16 +3,18 @@
 
 > The Python bindings for [`libzim`](https://github.com/openzim/libzim).
 
-This library allows you to interact with `.zim` files via Python.
-
-It just provides a shallow python interface on top of the  `libzim` C++ library (maintained by [OpenZIM](https://github.com/openzim)).
-
-## Quickstart
-
 ```bash
 # Install from PyPI: https://pypi.org/project/libzim/
 pip3 install libzim
 ```
+
+This library allows you to interact with `.zim` files via Python.
+
+It just provides a shallow Python interface on top of the  `libzim` C++ library (maintained by [OpenZIM](https://github.com/openzim)). The versions are pinned between the two packages (`python-libzim==6.1.1 <=> libzim==6.1.1`).
+
+It is primarily used by [`sotoki`](https://github.com/openzim/sotoki).
+
+## Quickstart
 
 ```python3
 # Writer API
@@ -145,7 +147,7 @@ python setup.py build_ext
 python setup.py install
 ```
 
-### Build package `stist` and `bdist_wheels` for PyPI
+### Build package `sdist` and `bdist_wheels` for PyPI
 
 ```bash
 python setup.py build_ext
@@ -240,3 +242,34 @@ with zimcreator('test.zim', main_index="welcome", ...) as zc:
                                     title='Test Zim')
     # zc.finalize() is called automatically when context manager exits
 ```
+
+---
+
+## Further Reading
+
+### Related Projects
+- https://github.com/openzim/sotoki
+- https://framagit.org/mgautierfr/pyzim
+- https://github.com/pediapress/pyzim
+- https://github.com/jarondl/pyzimmer/blob/master/pyzimmer/zim_writer.py
+
+### Research
+- https://github.com/cython/cython/wiki/AutoPxd
+- https://www.youtube.com/watch?v=YReJ3pSnNDo
+- https://github.com/openzim/zim-tools/blob/master/src/zimrecreate.cpp
+- https://github.com/cython/cython/wiki/enchancements-inherit_CPP_classes
+- https://groups.google.com/forum/#!topic/cython-users/vAB9hbLMxRg
+
+### Debugging
+- https://cython.readthedocs.io/en/latest/src/userguide/debugging.html
+- https://github.com/cython/cython/wiki/DebuggingTechniques
+- https://stackoverflow.com/questions/2663841/python-tracing-a-segmentation-fault
+- https://cython-devel.python.narkive.com/cW3Cn1th/debugging-a-segfault-in-a-cython-generated-module
+- https://groups.google.com/forum/#!topic/cython-users/B_Sxj2NV1PE
+
+### Packaging
+- https://download.openzim.org/release/libzim/
+- https://cibuildwheel.readthedocs.io/en/stable/faq/
+- https://github.com/pypa/manylinux
+- https://github.com/RalfG/python-wheels-manylinux-build/blob/master/full_workflow_example.yml
+- https://packaging.python.org/guides/packaging-binary-extensions/#publishing-binary-extensions
