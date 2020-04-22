@@ -10,6 +10,3 @@ cython = "==0.29.6"
 e1839a8 = {editable = true, path = "."}
 
 [packages]
-
-[requires]
-python_version = "3.7"
