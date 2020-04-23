@@ -92,6 +92,7 @@ class TestZimCreator(unittest.TestCase):
         zim_creator.update_metadata(**TEST_METADATA)
         self.assertEqual(zim_creator._get_metadata(), TEST_METADATA)
         zim_creator.finalize()
+        zim_creator.finalize()
 
     def test_check_mandatory_metadata(self):
         zim_creator = ZimCreator(

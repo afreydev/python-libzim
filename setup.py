@@ -10,24 +10,8 @@ To compile or run this project, you must first get the libzim headers & binary:
  - Or you can download a full prebuilt release (if one exists for your platform):
    https://download.openzim.org/release/libzim/
 
-   cd /tmp && wget -qO- https://download.openzim.org/release/libzim/libzim_linux-x86_64-6.1.1.tar.gz | tar -xz -C .
-   # to install libzim system-wide, move the headers and dylib into the system paths 
-   mv libzim_linux-x86_64-6.1.1/include/zim /usr/include/zim
-   mv libzim_linux-x86_64-6.1.1/lib/x86_64-linux-gnu/libzim.so.6 /usr/lib/libzim.so
-   # or, set these vars to make the compiler to search specific paths for libzim .h and .so files
-   export LIBZIM_INCLUDE_DIR=/tmp/libzim_linux-x86_64-6.1.1/include
-   export LIBZIM_LIBRARY_DIR=/tmp/libzim_linux-x86_64-6.1.1/lib/x86_64-linux-gnu
-
-To rebuild the cython extension, sdist, and bdist wheels:
-    rm libzim/libzim.cpp
-    rm -rf dist
-    rm -rf build
-    rm -rf libzim.egg-info
-    rm *.so
-    python setup.py build_ext --inplace
-    python setup.py sdist bdist_wheel
-    twine upload --repository-url https://test.pypi.org/legacy/ dist/*
-    pip install --index-url https://test.pypi.org/simple/ libzim
+   Either place the `libzim.so` and `zim/*.h` files in `./lib/` and `./include/` respectively,
+   or set LIBZIM_INCLUDE_DIR and  LIBZIM_LIBRARY_DIR to point to the dirs.
 """
 import os
 from pathlib import Path
