@@ -38,32 +38,28 @@ jobs:
           python-version: ${{ matrix.python-version }}
           architecture: x64
 
-      - name: Cache libzim dylib
+      - name: Cache libzim dylib & headers
         uses: actions/cache@master
         id: cache-libzim
         with:
           path: libzim_linux
           key: $LIBZIM_RELEASE-libzim-cache
 
-      - name:  Install libzim dylib & headers in system
+      - name: Download libzim dylib & headers from OpenZIM.org releases
         if: steps.cache-libzim.outputs.cache-hit != 'true'
         run: |
           wget -q https://download.openzim.org/release/libzim/$LIBZIM_RELEASE.tar.gz
           tar --gunzip --extract --file=$LIBZIM_RELEASE.tar.gz
           mv $LIBZIM_RELEASE libzim_linux
 
-      - name: Sync libzim dylib & headers in system
+      - name: Link libzim dylib & headers into workspace lib and include folders
         run: |
-          sudo rsync -a $GITHUB_WORKSPACE/libzim_linux/$LIBZIM_LIBRARY_PATH /usr/lib/libzim.so
-          sudo rsync -a $GITHUB_WORKSPACE/libzim_linux/$LIBZIM_INCLUDE_PATH/ /usr/include/zim/
-
-      - name: Copy libzim release for building
-        run: |
-          rsync -a $GITHUB_WORKSPACE/libzim_linux/ $GITHUB_WORKSPACE/$LIBZIM_RELEASE/
+          ln -s $GITHUB_WORKSPACE/libzim_linux/$LIBZIM_LIBRARY_PATH lib/libzim.so
+          ln -s $GITHUB_WORKSPACE/libzim_linux/$LIBZIM_INCLUDE_PATH include/zim
 
       - name: Build cython, sdist, and bdist_wheels
         run: |
-          pip install --upgrade cython==$CYTHON_VERSION setuptools pip cibuildwheel
+          pip install --upgrade cython==$CYTHON_VERSION setuptools pip
           python3 setup.py build_ext --inplace
           python3 setup.py sdist bdist_wheel
           python -m cibuildwheel --output-dir wheelhouse
