@@ -12,7 +12,6 @@ black = "*"
 flake8 = "*"
 mypy = "*"
 pytest = "*"
-tox = "*"
 twine = "*"
 
 [packages]
