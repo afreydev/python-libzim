@@ -23,15 +23,15 @@ jobs:
       - name: Autoformat with black
         run: |
           pip install black
-          black . --exclude=setup.py
+          black --check --exclude=setup.py .
 
       - name: Lint with flake8
         run: |
           pip install flake8
-          # stop the build if there are Python syntax errors or undefined names
+          # one pass for show-stopper syntax errors or undefined names
           flake8 . --count --select=E9,F63,F7,F82 --exclude=setup.py --show-source --statistics
-          # exit-zero treats all errors as warnings, this can be made stricter later
-          flake8 . --count --exit-zero --exclude=setup.py --max-line-length=$MAX_LINE_LENGTH --statistics
+          # one pass for small stylistic things
+          flake8 . --count --exclude=setup.py --max-line-length=$MAX_LINE_LENGTH --statistics
 
   test:
     runs-on: ${{ matrix.os }}
@@ -42,6 +42,7 @@ jobs:
         # os: [ubuntu-latest, windows-latest, macos-latest]
         # alternatively we can compile libzim in docker and use the container as an action
         python: [3.6, 3.7, 3.8]
+
     steps:
       - uses: actions/checkout@v2
 
@@ -51,24 +52,24 @@ jobs:
           python-version: ${{ matrix.python }}
           architecture: x64
 
-      - name: Cache libzim dylib
+      - name: Cache libzim dylib & headers
         uses: actions/cache@master
         id: cache-libzim
         with:
           path: libzim_linux
           key: $LIBZIM_RELEASE-libzim-cache
 
-      - name: Download libzim dylib & headers in system
+      - name: Download libzim dylib & headers from OpenZIM.org releases
         if: steps.cache-libzim.outputs.cache-hit != 'true'
         run: |
           wget -q https://download.openzim.org/release/libzim/$LIBZIM_RELEASE.tar.gz
           tar --gunzip --extract --file=$LIBZIM_RELEASE.tar.gz
           mv $LIBZIM_RELEASE libzim_linux
-      
-      - name: Sync libzim dylib & headers in system
+
+      - name: Link libzim dylib & headers into workspace lib and include folders
         run: |
-          sudo rsync -a $GITHUB_WORKSPACE/libzim_linux/$LIBZIM_LIBRARY_PATH /usr/lib/libzim.so
-          sudo rsync -a $GITHUB_WORKSPACE/libzim_linux/$LIBZIM_INCLUDE_PATH/ /usr/include/zim/
+          ln -s $GITHUB_WORKSPACE/libzim_linux/$LIBZIM_LIBRARY_PATH lib/libzim.so
+          ln -s $GITHUB_WORKSPACE/libzim_linux/$LIBZIM_INCLUDE_PATH include/zim
       
       - name: Build cython, sdist, and bdist_wheel
         run: |
