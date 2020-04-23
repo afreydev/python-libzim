@@ -5,3 +5,4 @@ include pyproject.toml
 
 recursive-include lib *
 recursive-include include *
+recursive-include libzim *
