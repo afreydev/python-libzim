@@ -47,8 +47,8 @@ GITHUB_URL = "https://github.com/openzim/python-libzim"
 BASE_DIR = Path(__file__).parent
 LIBZIM_CYTHON_DIR = 'libzim'
 
-INCLUDE_DIRS = [str(BASE_DIR / LIBZIM_CYTHON_DIR), str(BASE_DIR / 'include')]
-LIBRARY_DIRS = [str(BASE_DIR / 'lib')]
+INCLUDE_DIRS = [LIBZIM_CYTHON_DIR, 'include']
+LIBRARY_DIRS = ['lib']
 
 # use this option if you wish to manually specify the path to a prebuilt libzim release (.so and .h files)
 # set it to the path of the unzipped libzim subfolder containing zim/*.h
@@ -79,16 +79,16 @@ if LIBZIM_LIBRARY_DIR:
             )
         )
     LIBRARY_DIRS.insert(0, str(LIBZIM_LIBRARY_DIR))
-else:
-    # the default is to dynamically link (finds externally installed libzim on user's system)
-    if not (find_library('zim')):
-        print(
-            '[!] Warning: Could not find libzim.so in available system libraries\n'
-            '    Hint: Install it from source from https://github.com/openzim/libzim\n'
-            '          or download a prebuilt zim release and set the env varaibles to point to it:\n'
-            f'    LIBZIM_INCLUDE_DIR=/libzim_linux-x86_64-{VERSION}/include\n'
-            f'    LIBZIM_LIBRARY_DIR=/libzim_linux-x86_64-{VERSION}/lib/x86_64-linux-gnu'
-        )
+
+# the default is to dynamically link (finds externally installed libzim on user's system)
+if not (LIBZIM_LIBRARY_DIR or find_library('zim')):
+    print(
+        '[!] Warning: Could not find libzim.so in available system libraries or LIBZIM_LIBRARY_DIR\n'
+        '    Hint: Install it from source from https://github.com/openzim/libzim\n'
+        '          or download a prebuilt zim release and set the env varaibles to point to it:\n'
+        f'    LIBZIM_INCLUDE_DIR=/libzim_linux-x86_64-{VERSION}/include\n'
+        f'    LIBZIM_LIBRARY_DIR=/libzim_linux-x86_64-{VERSION}/lib/x86_64-linux-gnu'
+    )
 
 
 setup(
@@ -122,9 +122,9 @@ setup(
                 libraries=["zim"],
                 library_dirs=LIBRARY_DIRS,
                 extra_compile_args=[
-                  "-std=c++11",
-                  "-Wall",
-                  "-Wextra",
+                    "-std=c++11",
+                    "-Wall",
+                    "-Wextra",
                 ],
                 language="c++",
             )
