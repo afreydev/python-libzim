@@ -1,6 +1,17 @@
 #!/usr/bin/env python3
 """
-python-libzim (aka libzim)
+python-libzim (the openzim/libzim bindings for Python)
+
+The project is compiled in two steps:
+
+ 1. Cython: compile the cython format files (.pyx, .pyd) to C++ (.cpp and .h)
+ 2. Cythonize: compile the generated C++ to a python-importable binary extension .so
+
+The Cython and Cythonize compilation is done automatically during packaging with setup.py:
+
+ $ python3 setup.py build_ext
+ $ python3 setup.py sdist bdist_wheel
+
 
 To compile or run this project, you must first get the libzim headers & binary:
 
@@ -10,13 +21,17 @@ To compile or run this project, you must first get the libzim headers & binary:
  - Or you can download a full prebuilt release (if one exists for your platform):
    https://download.openzim.org/release/libzim/
 
-   Either place the `libzim.so` and `zim/*.h` files in `./lib/` and `./include/` respectively,
-   or set LIBZIM_INCLUDE_DIR and  LIBZIM_LIBRARY_DIR to point to the dirs.
+Either place the `libzim.so` and `zim/*.h` files in `./lib/` and `./include/`,
+   or set these environment variables to use custom libzim header and dylib paths:
+
+ $ export CFLAGS="-I/tmp/libzim_linux-x86_64-6.1.1/include"
+ $ export LDFLAGS="-L/tmp/libzim_linux-x86_64-6.1.1/lib/x86_64-linux-gnu"
+ $ export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/tmp/libzim_linux-x86_64-6.1.1/lib/x86_64-linux-gnu"
 """
-import os
 from pathlib import Path
-from setuptools import setup, Extension
 from ctypes.util import find_library
+
+from setuptools import setup, Extension
 from Cython.Build import cythonize
 
 
@@ -29,51 +44,28 @@ AUTHOR_EMAIL = "jdc@monadical.com"
 GITHUB_URL = "https://github.com/openzim/python-libzim"
 
 BASE_DIR = Path(__file__).parent
-LIBZIM_CYTHON_DIR = 'libzim'
-
-INCLUDE_DIRS = [LIBZIM_CYTHON_DIR, 'include']
-LIBRARY_DIRS = ['lib']
-
-# use this option if you wish to manually specify the path to a prebuilt libzim release (.so and .h files)
-# set it to the path of the unzipped libzim subfolder containing zim/*.h
-LIBZIM_INCLUDE_DIR = os.getenv('LIBZIM_INCLUDE_DIR')
-if LIBZIM_INCLUDE_DIR:
-    if (Path(LIBZIM_INCLUDE_DIR) / 'zim/zim.h').exists():
-        INCLUDE_DIRS.insert(0, str(LIBZIM_INCLUDE_DIR))
-    else:
-        raise Exception(
-            f'Could not find zim/*.h files in LIBZIM_INCLUDE_DIR={LIBZIM_INCLUDE_DIR}\n'
-            f'    Hint: git clone --depth 1 -b tags/{VERSION} https://github.com/openzim/libzim libzim_cpp'
-            '          export LIBZIM_INCLUDE_DIR=$PWD/libzim_cpp/include'
-        )
+BINDINGS_CYTHON_DIR = 'libzim'   # the cython binding source dir (containing .pyx, .pyd, etc.)
+LIBZIM_INCLUDE_DIR = 'include'   # the libzim C++ header src dir (containing zim/*.h)
+LIBZIM_LIBRARY_DIR = 'lib'       # the libzim .so binary lib dir (containing libzim.so)
 
 
-# use this option to manually specify the libzim dynamic library (aka "shared object") dir
-# set it to the path of the unzipped libzim subfolder containing libzim.so
-LIBZIM_LIBRARY_DIR = os.getenv('LIBZIM_LIBRARY_DIR')
-if LIBZIM_LIBRARY_DIR:
-    if not ((Path(LIBZIM_LIBRARY_DIR) / 'libzim.so').exists() or (Path(LIBZIM_LIBRARY_DIR) / 'libzim.a').exists()):
-        potential_dylibs = [f for f in Path(LIBZIM_LIBRARY_DIR).iterdir() if 'libzim.so' in str(f)]
-        raise Exception(
-            f'Could not find libzim.so file in LIBZIM_LIBRARY_DIR={LIBZIM_LIBRARY_DIR}\n' +
-            (
-                f'    Hint: ln -s {potential_dylibs[0].name} {LIBZIM_LIBRARY_DIR}/libzim.so'
-                if potential_dylibs else
-                f'    Hint: LIBZIM_LIBRARY_DIR should look something like .../libzim_linux-x86_64-{VERSION}/lib/x86_64-linux-gnu'
-            )
-        )
-    LIBRARY_DIRS.insert(0, str(LIBZIM_LIBRARY_DIR))
-
-# the default is to dynamically link (finds externally installed libzim on user's system)
-if not (LIBZIM_LIBRARY_DIR or find_library('zim')):
+# Check for the CPP Libzim library headers in expected directory
+if not (BASE_DIR / LIBZIM_INCLUDE_DIR / 'zim/zim.h').exists():
     print(
-        '[!] Warning: Could not find libzim.so in available system libraries or LIBZIM_LIBRARY_DIR\n'
-        '    Hint: Install it from source from https://github.com/openzim/libzim\n'
-        '          or download a prebuilt zim release and set the env varaibles to point to it:\n'
-        f'    LIBZIM_INCLUDE_DIR=/libzim_linux-x86_64-{VERSION}/include\n'
-        f'    LIBZIM_LIBRARY_DIR=/libzim_linux-x86_64-{VERSION}/lib/x86_64-linux-gnu'
+        f"[!] Warning: Couldn't find zim/*.h in ./{LIBZIM_INCLUDE_DIR}!\n"
+        f"    Hint: You can install them from source from https://github.com/openzim/libzim\n"
+        f"          or download a prebuilt release's headers into ./include/zim/*.h\n"
+        f"          (or set CFLAGS='-I/tmp/libzim_linux-x86_64-{VERSION}/include')"
     )
 
+# Check for the CPP Libzim shared library in expected directory or system paths
+if not ((BASE_DIR / LIBZIM_LIBRARY_DIR / 'libzim.so').exists() or find_library('zim')):
+    print(
+        f"[!] Warning: Couldn't find libzim.so in ./{LIBZIM_LIBRARY_DIR} or system library paths!"
+        f"    Hint: You can install it from source from https://github.com/openzim/libzim\n"
+        f"          or download a prebuilt zimlib.so release into ./lib.\n"
+        f"          (or set LDFLAGS='-L/tmp/libzim_linux-x86_64-{VERSION}/lib/x86_64-linux-gnu')"
+    )
 
 setup(
     name=PACKAGE_NAME,
@@ -99,12 +91,19 @@ setup(
             Extension(
                 "libzim_wrapper",
                 sources=[
-                    f"{LIBZIM_CYTHON_DIR}/*.pyx",
-                    f"{LIBZIM_CYTHON_DIR}/lib.cxx",
+                    f"{BINDINGS_CYTHON_DIR}/*.pyx",
+                    f"{BINDINGS_CYTHON_DIR}/lib.cxx",
                 ],
-                include_dirs=INCLUDE_DIRS,
-                libraries=["zim"],
-                library_dirs=LIBRARY_DIRS,
+                include_dirs=[
+                    BINDINGS_CYTHON_DIR,
+                    LIBZIM_INCLUDE_DIR,
+                ],
+                libraries=[
+                    'zim',
+                ],
+                library_dirs=[
+                    LIBZIM_LIBRARY_DIR,
+                ],
                 extra_compile_args=[
                     "-std=c++11",
                     "-Wall",
@@ -120,21 +119,20 @@ setup(
         "Development Status :: 3 - Alpha",
 
         "Topic :: Utilities",
+        "Topic :: Software Development :: Libraries",
+        "Topic :: Software Development :: Libraries :: Python Modules",
         "Topic :: System :: Archiving",
         "Topic :: System :: Archiving :: Compression",
         "Topic :: System :: Archiving :: Mirroring",
         "Topic :: System :: Archiving :: Backup",
-        "Topic :: Sociology :: History",
         "Topic :: Internet :: WWW/HTTP",
         "Topic :: Internet :: WWW/HTTP :: Indexing/Search",
-        "Topic :: Software Development :: Libraries",
-        "Topic :: Software Development :: Libraries :: Python Modules",
+        "Topic :: Sociology :: History",
 
         "Intended Audience :: Developers",
         "Intended Audience :: Education",
         "Intended Audience :: End Users/Desktop",
         "Intended Audience :: Information Technology",
-        "Intended Audience :: Legal Industry",
         "Intended Audience :: System Administrators",
         
         "Programming Language :: Cython",
