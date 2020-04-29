@@ -75,7 +75,7 @@ jobs:
                 
       - name: Build cython, sdist, and bdist_wheel
         run: |
-          pip install --upgrade cython setuptools pip wheel
+          pip install --upgrade cython==$CYTHON_VERSION setuptools pip wheel
           python3 setup.py build_ext
           python3 setup.py sdist bdist_wheel
           
