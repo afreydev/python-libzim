@@ -68,11 +68,12 @@ jobs:
 
       - name: Link libzim dylib & headers into workspace lib and include folders
         run: |
-          ln -s $GITHUB_WORKSPACE/libzim_linux/$LIBZIM_LIBRARY_PATH lib/libzim.so
-          ln -s $GITHUB_WORKSPACE/libzim_linux/$LIBZIM_INCLUDE_PATH include/zim
-      
+          ln -s $GITHUB_WORKSPACE/libzim_linux/$LIBZIM_LIBRARY_PATH $GITHUB_WORKSPACE/libzim_linux/lib/x86_64-linux-gnu/libzim.so
+                
       - name: Build cython, sdist, and bdist_wheel
         run: |
+          export CFLAGS="-I$PWD/libzim_linux/include" 
+          export LDFLAGS="-L$PWD/libzim_linux/lib/x86_64-linux-gnu"
           pip install --upgrade cython==$CYTHON_VERSION setuptools pip wheel
           python3 setup.py build_ext
           python3 setup.py sdist bdist_wheel
@@ -82,5 +83,5 @@ jobs:
           export LD_LIBRARY_PATH=$PWD/lib:$LD_LIBRARY_PATH
           sudo ldconfig
           pip install pytest
-          pip install -e .
+          CFLAGS="-I$PWD/libzim_linux/include" LDFLAGS="-L$PWD/libzim_linux/lib/x86_64-linux-gnu" pip install -e .
           pytest .
