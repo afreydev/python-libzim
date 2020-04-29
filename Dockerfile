@@ -18,6 +18,11 @@ RUN wget -qO- https://download.openzim.org/release/libzim/$LIBZIM_RELEASE.tar.gz
     && mv $LIBZIM_RELEASE/$LIBZIM_LIBRARY_PATH /usr/lib/libzim.so \
     && mv $LIBZIM_RELEASE/$LIBZIM_INCLUDE_PATH /usr/include/zim \
     && ldconfig
+    # installing these system-wide inside of docker allows
+    # users to run their dockerized code without needing to muck
+    # around with LDFLAGS and CPPFLAGS to find libzim.
+    # there will be only one copy of libzim, and it will be 
+    # automatically available to all software system-wide
 
 # Install python dependencies
 RUN pip3 install --no-cache-dir --upgrade \
