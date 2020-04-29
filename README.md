@@ -160,8 +160,9 @@ twine upload dist/*
 ### Use a specific `libzim` dylib and headers when compiling `python-libzim`
 
 ```bash
-export LIBZIM_INCLUDE_DIR=/tmp/libzim_linux-x86_64-6.1.1/include
-export LIBZIM_LIBRARY_DIR=/tmp/libzim_linux-x86_64-6.1.1/lib/x86_64-linux-gnu
+export CFLAGS="-I/tmp/libzim_linux-x86_64-6.1.1/include"
+export LDFLAGS="-L/tmp/libzim_linux-x86_64-6.1.1/lib/x86_64-linux-gnu"
+export LD_LIBRARY_PATH="/tmp/libzim_linux-x86_64-6.1.1/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH"
 python setup.py build_ext
 python setup.py install
 ```
