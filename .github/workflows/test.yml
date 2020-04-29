@@ -3,7 +3,8 @@ on: [push]
 
 env:
   LIBZIM_RELEASE: libzim_linux-x86_64-6.1.1
-  LIBZIM_LIBRARY_PATH: lib/x86_64-linux-gnu/libzim.so.6.1.1
+  LIBZIM_LIBRARY_PATH: lib/x86_64-linux-gnu
+  LIBZIM_LIBRARY: libzim.so.6.1.1
   LIBZIM_INCLUDE_PATH: include/zim
   CYTHON_VERSION: 0.29.6
   MAX_LINE_LENGTH: 110
@@ -68,9 +69,11 @@ jobs:
 
       - name: Link libzim dylib & headers into workspace lib and include folders
         run: |
-          ln -s $GITHUB_WORKSPACE/libzim_linux/$LIBZIM_LIBRARY_PATH lib/libzim.so
-          ln -s $GITHUB_WORKSPACE/libzim_linux/$LIBZIM_LIBRARY_PATH lib/libzim.so.6
+          cp -p $GITHUB_WORKSPACE/libzim_linux/$LIBZIM_LIBRARY_PATH/$LIBZIM_LIBRARY lib/
+          cd lib & ln -s $LIBZIM_LIBRARY libzim.so
           ln -s $GITHUB_WORKSPACE/libzim_linux/$LIBZIM_INCLUDE_PATH include/zim
+          export LD_LIBRARY_PATH=$PWD/lib:$LD_LIBRARY_PATH
+          sudo ldconfig
                 
       - name: Build cython, sdist, and bdist_wheel
         run: |
@@ -80,8 +83,6 @@ jobs:
           
       - name: Test built package with pytest
         run: |
-          export LD_LIBRARY_PATH=$PWD/lib:$LD_LIBRARY_PATH
-          sudo ldconfig
           pip install pytest
           pip install -e .
           pytest .
