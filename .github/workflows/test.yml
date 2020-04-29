@@ -68,8 +68,8 @@ jobs:
 
       - name: Link libzim dylib & headers into workspace lib and include folders
         run: |
-          cp -p $GITHUB_WORKSPACE/libzim_linux/$LIBZIM_LIBRARY_PATH/$LIBZIM_LIBRARY_PATH lib/libzim.so
-          cp -p $GITHUB_WORKSPACE/libzim_linux/$LIBZIM_LIBRARY_PATH/$LIBZIM_LIBRARY_PATH lib/
+          cp -p $GITHUB_WORKSPACE/libzim_linux/$LIBZIM_LIBRARY_PATH lib/libzim.so
+          cp -p $GITHUB_WORKSPACE/libzim_linux/$LIBZIM_LIBRARY_PATH lib/
           sudo ldconfig $GITHUB_WORKSPACE/lib
           ln -s $GITHUB_WORKSPACE/libzim_linux/$LIBZIM_INCLUDE_PATH include/zim
                 
