@@ -82,17 +82,17 @@ class TestZimCreator(unittest.TestCase):
         )
         zim_creator.finalize()
 
-    def test_article_metadata(self):
-        zim_creator = ZimCreator(
-            os.path.join(self.test_dir, f'test-metadata-{uuid.uuid1()}.zim'),
-            main_page="welcome",
-            index_language="eng",
-            min_chunk_size= 2048,
-        )
-        zim_creator.update_metadata(**TEST_METADATA)
-        self.assertEqual(zim_creator._get_metadata(), TEST_METADATA)
-        zim_creator.finalize()
-        zim_creator.finalize()
+#    def test_article_metadata(self):
+#        zim_creator = ZimCreator(
+#            os.path.join(self.test_dir, f'test-metadata-{uuid.uuid1()}.zim'),
+#            main_page="welcome",
+#            index_language="eng",
+#            min_chunk_size= 2048,
+#        )
+#        zim_creator.update_metadata(**TEST_METADATA)
+#        self.assertEqual(zim_creator._get_metadata(), TEST_METADATA)
+#        zim_creator.finalize()
+#        zim_creator.finalize()
 
     def test_check_mandatory_metadata(self):
         zim_creator = ZimCreator(
