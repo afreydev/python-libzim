@@ -85,4 +85,4 @@ jobs:
           sudo ldconfig
           pip install pytest
           pip install -e .
-          pytest --assert=plain .
+          pytest .
