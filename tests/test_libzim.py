@@ -131,7 +131,7 @@ TEST_METADATA = {
     "Description": "All articles (without images) from the english Wikipedia",
     "Language": "eng",
     # Optional
-    "LongDescription": "This ZIM file contains all articles (without images) from the english Wikipedia by 2009-11-10. The topics are ...",
+    "Longdescription": "This ZIM file contains all articles (without images) from the english Wikipedia by 2009-11-10. The topics are ...",
     "Licence": "CC-BY",
     "Tags": "wikipedia;_category:wikipedia;_pictures:no;_videos:no;_details:yes;_ftindex:yes",
     "Flavour": "nopic",
