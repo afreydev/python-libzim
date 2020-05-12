@@ -76,7 +76,7 @@ jobs:
           sudo meson . build
           sudo ninja -C build install
           cd ..
-          rm -rf libzim-src
+          sudo rm -rf libzim-src
 
       - name: Include folders to LD path
         run: |
