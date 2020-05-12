@@ -74,15 +74,10 @@ jobs:
           cd libzim-src && git checkout 6.0.2
           sudo meson . build
           sudo ninja -C build install
-      
-      - name: Cache libzim dylib & headers
-        uses: actions/cache@master
-        id: cache-libzim
-        with:
-          path: libzim_linux
-          key: $LIBZIM_RELEASE-libzim-cache
+          cd ..
+          rm -rf libzim-src
 
-      - name: Link libzim dylib & headers into workspace lib and include folders
+      - name: Include folders to LD path
         run: |
           export LD_LIBRARY_PATH=/usr/local/lib/x86_64-linux-gnu/:$LD_LIBRARY_PATH
           sudo ldconfig
