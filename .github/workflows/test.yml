@@ -41,7 +41,8 @@ jobs:
         # TODO: expand this once macos and windows libzim releases become available
         # os: [ubuntu-latest, windows-latest, macos-latest]
         # alternatively we can compile libzim in docker and use the container as an action
-        python: [3.6, 3.7, 3.8]
+        #python: [3.6, 3.7, 3.8]
+        python: [3.7]
 
     steps:
       - uses: actions/checkout@v2
@@ -70,8 +71,7 @@ jobs:
       - name: Install libzim
         run: |
           git clone https://github.com/openzim/libzim.git libzim-src
-          cd libzim && git checkout 6.0.2
-          cd libzim 
+          cd libzim-src && git checkout 6.0.2
           sudo meson . build
           sudo ninja -C build install
       
