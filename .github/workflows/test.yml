@@ -56,17 +56,17 @@ jobs:
       - name: Install compilation dependencies
         run: |
           sudo apt update -y && \
-          sudo apt install -y --no-install-recommends git pkg-config libtool automake autoconf make g++ liblzma-dev coreutils meson ninja-build wget zlib1g-dev libicu-dev libgumbo-dev libmagic-dev ca-certificates && \
+          sudo apt install -y --no-install-recommends git pkg-config libtool automake autoconf make g++ liblzma-dev libxapian-dev coreutils meson ninja-build wget zlib1g-dev libicu-dev libgumbo-dev libmagic-dev ca-certificates && \
           sudo apt clean -y
           sudo update-ca-certificates
       
-      - name: Install xapian
-        run: |
-          wget https://oligarchy.co.uk/xapian/1.4.14/xapian-core-1.4.14.tar.xz
-          tar xvf xapian-core-1.4.14.tar.xz
-          cd xapian-core-1.4.14 
-          sudo ./configure
-          sudo make all install
+      #- name: Install xapian
+      #  run: |
+      #    wget https://oligarchy.co.uk/xapian/1.4.14/xapian-core-1.4.14.tar.xz
+      #    tar xvf xapian-core-1.4.14.tar.xz
+      #    cd xapian-core-1.4.14 
+      #    sudo ./configure
+      #    sudo make all install
           
       - name: Install libzim
         run: |
