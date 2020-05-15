@@ -31,8 +31,6 @@ if not find_library('zim'):
 
 # test files https://wiki.kiwix.org/wiki/Content_in_all_languages
 
-from libzim import ZimArticle, ZimBlob, ZimCreator
-
 # https://wiki.openzim.org/wiki/Metadata
 @pytest.fixture(scope="session")
 def metadata():
