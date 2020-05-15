@@ -57,7 +57,7 @@ jobs:
         id: cache-libzim
         with:
           path: libzim_linux
-          key: $LIBZIM_RELEASE-libzim-cache
+          key: ${{ env.LIBZIM_RELEASE }}-libzim-cache
 
       - name: Download libzim dylib & headers from OpenZIM.org releases
         if: steps.cache-libzim.outputs.cache-hit != 'true'
@@ -68,7 +68,9 @@ jobs:
 
       - name: Link libzim dylib & headers into workspace lib and include folders
         run: |
-          ln -s $GITHUB_WORKSPACE/libzim_linux/$LIBZIM_LIBRARY_PATH lib/libzim.so
+          cp -p $GITHUB_WORKSPACE/libzim_linux/$LIBZIM_LIBRARY_PATH lib/libzim.so
+          cp -p $GITHUB_WORKSPACE/libzim_linux/$LIBZIM_LIBRARY_PATH lib/
+          sudo ldconfig $GITHUB_WORKSPACE/lib
           ln -s $GITHUB_WORKSPACE/libzim_linux/$LIBZIM_INCLUDE_PATH include/zim
       
       - name: Build cython, sdist, and bdist_wheel
